@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Bootstrap Example</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+
+</head>
+<body>
+
+<div class="container">
+    <h2>Show Customer</h2>
+    <a href="/create" class="btn btn-success">Create</a>
+    <br>
+    <br>
+    <form action="/find" method="get">
+        <input type="text" class="form-control" placeholder="search" name="name" id="findName" oninput="search()">
+        <button type="submit" class="btn btn-success">Find</button>
+    </form>
+
+    <br>
+    <br>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>title</th>
+            <th>content</th>
+            <th>likes</th>
+            <th>views</th>
+            <th>createDate</th>
+            <th>category</th>
+            <th>Edit</th>
+            <th>Delete</th>
+
+        </tr>
+        </thead>
+        <tbody id="tbody">
+
+        </tbody>
+    </table>
+    <br>
+</div>
+<table class="table">
+    <thead>
+    <tr>
+        <th>#</th>
+        <th>content</th>
+    </tr>
+    </thead>
+    <tbody id="tbodyComment">
+
+    </tbody>
+</table>
+
+
+</body>
+</html>
+<script>
+
+    function show() {
+        $.ajax({
+            type: "GET",
+            url: "http://localhost:8080/api/blogs",
+            //xử lý khi thành công
+            success: function (pageBlogs) {
+                document.getElementById("tbody").innerHTML = showData(pageBlogs);
+            },
+            error: function (err) {
+                console.log(err)
+            }
+        })
+    }
+
+
+    function showData(pageable) {
+        let arrBlogs = pageable.content;
+        let str = "";
+
+        for (let i = 0; i < arrBlogs.length; i++) {
+            str += `<tr>
+            <td>${i + 1}</td>
+            <td>${arrBlogs[i].title}</td>
+            <td>${arrBlogs[i].content}</td>
+            <td>${arrBlogs[i].likes}</td>
+            <td>${arrBlogs[i].views}</td>
+            <td>${arrBlogs[i].createDate}</td>
+            <td>${arrBlogs[i].category.name}</td>
+            <td><button class="btn btn-warning" onclick="redirectShowDetail(${arrBlogs[i].id})">Xem them</button></td>
+            <td><button class="btn btn-warning">delete</button></td>
+        </tr>`
+
+        }
+        return str;
+    }
+
+    function redirectShowDetail(idBlog){
+      window.localStorage.setItem("idBlog",idBlog);
+      window.location.href = "blogDetail.html";
+    }
+
+    show();
+</script>
+

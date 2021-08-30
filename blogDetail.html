@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+
+</head>
+<body>
+<div id="blog"></div>
+<h1 align="center"> Đây là comment</h1>
+<div id="comment"></div>
+
+
+</body>
+</html>
+
+<script>
+  let idBlog = window.localStorage.getItem("idBlog");
+
+  function showBlog(idBlog) {
+    $.ajax({
+      type: "GET",
+      url: `http://localhost:8080/api/blogs/${idBlog}`,
+      //xử lý khi thành công
+      success: function (blog) {
+        let str = ` <h1>${blog.title}</h1>
+            <h2>${blog.content}</h2>
+            <h3>${blog.likes}</h3>
+            <h3>${blog.views}</h3>
+            <h3>${blog.createDate}</h3>
+            <h3>${blog.category.name}</h3>`;
+        document.getElementById("blog").innerHTML = str;
+        showComment(idBlog);
+      },
+      error: function (err) {
+        console.log(err)
+      }
+    })
+  }
+
+  function showComment(idBlog) {
+    $.ajax({
+      type: "GET",
+      url: `http://localhost:8080/api/blogs/comments/${idBlog}`,
+      //xử lý khi thành công
+      success: function (comments) {
+        let str = "";
+        for (let i = 0; i < comments.length; i++) {
+          str += `<h1>${comments[i].content}</h1>`
+        }
+        document.getElementById("comment").innerHTML = str;
+      },
+      error: function (err) {
+        console.log(err)
+      }
+    })
+  }
+
+
+  showBlog(idBlog);
+</script>

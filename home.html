@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Bootstrap Example</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+
+</head>
+<body>
+
+<div class="container">
+    <h2>Show Customer</h2>
+    <a href="/create" class="btn btn-success">Create</a>
+    <br>
+    <br>
+    <form action="/find" method="get">
+        <input type="text" class="form-control" placeholder="search" name="name" id="findName" oninput="search()">
+        <button type="submit" class="btn btn-success">Find</button>
+    </form>
+
+    <br>
+    <br>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Address</th>
+            <th>BirthDay</th>
+            <th>Img</th>
+            <th>Email</th>
+            <th>Phome</th>
+            <th>Edit</th>
+            <th>Delete</th>
+
+        </tr>
+        </thead>
+        <tbody id="tbody">
+
+        </tbody>
+    </table>
+    <br>
+
+    <table class="table" id="tableEdit">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Address</th>
+            <th>BirthDay</th>
+            <th>Img</th>
+            <th>Email</th>
+            <th>Phome</th>
+        </tr>
+        </thead>
+        <tbody id="tbodyEdit">
+
+        </tbody>
+    </table>
+</div>
+
+
+</body>
+</html>
+<script>
+    let totalPages = 1;
+
+    function show(pageNumber) {
+        if (pageNumber < 0) {
+            pageNumber = 0;
+        }
+        if (pageNumber > totalPages - 1) {
+            pageNumber = totalPages - 1;
+        }
+        let url = `http://localhost:8080/api/students?page=${pageNumber}`;
+        $.ajax({
+            type: "GET",
+            url: url,
+            //xử lý khi thành công
+            success: function (data) {
+                console.log("gọi thành công và trả về :")
+                document.getElementById("tbody").innerHTML = showData(data);
+                totalPages = data.totalPages;
+            },
+            error: function (err) {
+                console.log(err)
+            }
+        })
+    }
+
+    function search() {
+        let name = document.getElementById("findName").value;
+        let url = `http://localhost:8080/api/students/find/${name}`;
+
+        $.ajax({
+            headers: {
+                'Accept': 'application/json'
+            },
+            type: "GET",
+            url: url,
+            //xử lý khi thành công
+            success: function (data) {
+                document.getElementById("tbody").innerHTML = showData(data);
+            },
+            error: function (err) {
+                console.log(err)
+            }
+        })
+    }
+
+    function showEdit(id) {
+        let url = `http://localhost:8080/api/students/${id}`;
+
+        $.ajax({
+            headers: {
+                'Accept': 'application/json'
+            },
+            type: "GET",
+            url: url,
+            //xử lý khi thành công
+            success: function (data) {
+                console.log(data)
+                document.getElementById("tbodyEdit").innerHTML = showDataEdit(data);
+            },
+            error: function (err) {
+                console.log(err)
+            }
+        })
+    }
+
+    function saveEdit() {
+        let student = {
+            id: document.getElementById("id").value,
+            name: document.getElementById("name").value,
+            address: document.getElementById("address").value,
+            birthDay: document.getElementById("birthDay").value,
+            avatar: document.getElementById("avatar").value,
+            email: document.getElementById("email").value,
+            phone: document.getElementById("phone").value,
+            classRoom: {
+                id:1
+            }
+        }
+        let url = `http://localhost:8080/api/students`;
+
+        $.ajax({
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            data: JSON.stringify(student),
+            type: "PUT",
+            url: url,
+            //xử lý khi thành công
+            success: function (data) {
+                alert("update thành công");
+                show(0);
+            },
+            error: function (err) {
+                console.log(err)
+            }
+        })
+    }
+
+    function showDataEdit(student) {
+        return `<tr>
+            <td><input id="id" value="${student.id}" readonly></td>
+            <td><input id="name" value="${student.name}"></td>
+            <td><input id="address" value="${student.address}"></td>
+            <td><input id="birthDay" type="date" value="${student.birthDay}"></td>
+            <td><input id="avatar" value="${student.avatar}"></td>
+            <td><input id="email" value="${student.email}"></td>
+            <td><input id="phone" value="${student.phone}"></td>
+            </tr>
+            <button onclick="saveEdit()">Edit</button>
+`
+    }
+
+    // function edit(id){
+    //     window.localStorage.setItem("idStudent",id);
+    //     window.location.href="edit.html";
+    // }
+
+
+    function showData(pageable) {
+        let arrStudent = pageable.content;
+        let str = "";
+
+        for (let i = 0; i < arrStudent.length; i++) {
+            str += `<tr>
+            <td>${i + 1}</td>
+            <td>${arrStudent[i].name}</td>
+            <td>${arrStudent[i].address}</td>
+            <td>${arrStudent[i].birthDay}</td>
+            <td><img src="${arrStudent[i].avatar}" width="150" height="150"></td>
+            <td>${arrStudent[i].email}</td>
+            <td>${arrStudent[i].phone}</td>
+            <td><button class="btn btn-warning" onclick="showEdit(${arrStudent[i].id})">edit</button></td>
+            <td><button class="btn btn-warning">delete</button></td>
+        </tr>`
+
+        }
+        str += `<button onclick="show(${pageable.number - 1})">Back</button>
+                 <span>${pageable.number + 1}</span>/<span>${pageable.totalPages}</span>
+                 <button onclick="show(${pageable.number + 1})">Next</button>`
+        return str;
+    }
+
+    show(0);
+</script>
+
